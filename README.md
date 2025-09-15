@@ -1,1 +1,1 @@
-# Trial-Assignment-Frontend
+# Confession Wall Frontend Project
