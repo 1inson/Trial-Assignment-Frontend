@@ -23,8 +23,13 @@ import { createRouter, createWebHistory } from 'vue-router';
           component: () => import('../views/CommunityView.vue'),
           // meta字段用于定义路由元信息，比如“这个页面需要登录”
           meta: { requiresAuth: true }
-        }
-        // 未来在这里添加 /profile, /confession/:id 等路由
+        },
+        {
+        path: '/profile', // 个人页面的访问地址
+        name: 'profile',
+        component: () => import('../views/ProfileView.vue'),
+        meta: { requiresAuth: true } // 【关键】确保这个页面需要登录才能访问
+        },
       ]
     });
 
