@@ -18,11 +18,11 @@ interface RegisterInfo {
 
 // 用户个人资料的类型 \
 interface UserProfile {
-  id: string; // 外部ID 
+  user_id: string; // 外部ID 
   username: string; // 登录名
   name: string; // 昵称
-  usertype: number; // 用户类型
-  avatarUrl: string | null; // 用户头像URL
+  usertype: string; // 用户类型
+  avatar: string | null; // 用户头像URL
 }
 
 // 【新增】定义一条通知的类型
@@ -42,6 +42,17 @@ interface Notification {
   isRead: boolean;
 }
 
+// 【新增】定义一条表白帖子的类型
+interface Confession {
+  id: string;
+  content: string;
+  imageUrls: string[];
+  isAnonymous: boolean;
+  isPublic: boolean;
+  createdAt: string;
+  // ... 其他可能的字段，比如点赞数、评论数
+}
+
 // 定义一个 Pinia 状态存储
 export const useUserStore = defineStore('user', () => {
   const router = useRouter();
@@ -58,6 +69,18 @@ export const useUserStore = defineStore('user', () => {
   const unreadCount = ref<number>(0);
   const isLoadingNotifications = ref(false);
   const hasNewMessages = computed(() => unreadCount.value > 0);
+
+  // 使用 Partial<T> 工具类型，表示这个对象里的所有属性都是可选的
+type UserProfileUpdatePayload = Partial<{
+  name: string;      // 昵称
+  avatar: string; // 头像URL
+  // ... 其他未来可能允许用户修改的字段
+}>;
+
+   // 用来存储从 API 获取到的、我发布的帖子列表
+  const myConfessions = ref<Confession[]>([]);
+  // 一个加载状态，方便 UI 显示“加载中...”
+  const isLoadingMyConfessions = ref(false);
 
   function setTokens(newAccessToken: string, newRefreshToken: string) {
     accessToken.value = newAccessToken;
@@ -140,6 +163,37 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  // 更新用户个人资料的 Action
+  async function updateProfile(payload: UserProfileUpdatePayload) {
+    if (!isLoggedIn.value || !profile.value) return;
+
+    try {
+      // 1. 发送 PUT 请求到后端
+      const response = await axios.put('/api/users/me', payload, {
+        headers: {
+          Authorization: `Bearer ${accessToken.value}`
+        }
+      });
+
+      if (response.data.code === 0) {
+        // 2. 更新成功后，用后端返回的最新用户信息来更新本地的 profile
+        //    这确保了前端状态和后端数据库的最终一致性
+        profile.value = response.data.data;
+        
+        // 也可以选择性地更新，如果后端只返回部分字段
+        // Object.assign(profile.value, response.data.data);
+
+      } else {
+        throw new Error(response.data.msg);
+      }
+    } catch (error) {
+      console.error("更新用户信息失败:", error);
+      // 将错误重新抛出，以便组件可以捕获并提示用户
+      throw error;
+    }
+  }
+
+
 
   // 获取未读消息数 (用于更新小红点)
   async function fetchUnreadCount() {
@@ -194,6 +248,34 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  // 调用 API (GET /api/confessions/my) 来获取数据
+  async function fetchMyConfessions() {
+    if (!isLoggedIn.value) return; // 确保已登录
+
+    isLoadingMyConfessions.value = true;
+    try {
+      const response = await axios.get('/api/confessions/my', {
+        headers: {
+          // 这个接口需要认证，所以必须带上 Token
+          Authorization: `Bearer ${accessToken.value}`
+        }
+      });
+
+      if (response.data.code === 0) {
+        // 请求成功，将返回的帖子列表存入 state
+        myConfessions.value = response.data.data.list; 
+      } else {
+        throw new Error(response.data.msg);
+      }
+    } catch (error) {
+      console.error("获取我发布的帖子失败:", error);
+      // 这里可以添加错误提示，比如弹出一个 Toast
+    } finally {
+      // 无论成功还是失败，最后都结束加载状态
+      isLoadingMyConfessions.value = false;
+    }
+  }
+
 
   return { 
     accessToken, 
@@ -203,13 +285,17 @@ export const useUserStore = defineStore('user', () => {
     login, 
     register, 
     logout,
-    fetchUserProfile // <-- 导出获取信息的方法
+    fetchUserProfile, // <-- 导出获取信息的方法
+    updateProfile,
     notifications,
     unreadCount,
     isLoadingNotifications,
     hasNewMessages,
     fetchUnreadCount,
     fetchNotifications,
-    markAllAsRead
+    markAllAsRead,
+     myConfessions,
+    isLoadingMyConfessions,
+    fetchMyConfessions,
   };
 })
