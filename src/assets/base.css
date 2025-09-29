@@ -1,46 +1,50 @@
 :root {
-  /* 基础颜色 */
-  --vt-c-white: #ffffff;
-  --vt-c-black: #181818;
-  --vt-c-indigo: #2c3e50;
   
-  /* 语义化颜色变量 */
-  --color-background: var(--vt-c-white);
-  --color-text: var(--vt-c-indigo);
+  /* --- 背景 --- */
+  --brand-pink: #ff69b4;         /* 一个明亮的、标志性的粉色 */
+  --brand-pink-soft: #ff85c0;    /* 一个更柔和的粉色，用于hover等 */
+  --background-main: #fdf2f8;    /* 一个非常浅的粉色/米白色背景，营造温暖感 */
+  --background-container: #ffffff;/* 纯白的卡片背景，形成对比 */
+  --text-primary: #1f2937;       /* 深灰色文字，比纯黑更柔和 */
+  --text-secondary: #6b7280;     /* 浅灰色文字，用于次要信息 */
+  --border-color: #fce7f3;       /* 一个非常浅的粉色边框 */
+  --text-on-brand: #ffffff;      /* 在粉色背景上的白色文字 */
+  --danger-color: #ef4444;       /* 红色，用于删除等危险操作 */
+
+
+  /* --- 颜色 --- */
+ 
+  --primary-color: var(--brand-pink);
+  --primary-color-soft: var(--brand-pink-soft);
+  --background-color: var(--background-main);
+  --container-background-color: var(--background-container);
+  --text-color-primary: var(--text-primary);
+  --text-color-secondary: var(--text-secondary);
+  --border-color: var(--border-color);
+  --text-on-primary-color: var(--text-on-brand);
+
+  /* --- 字体大小 --- */
+  --font-size-base: 16px;
+  --font-size-small: 0.875rem;
+  --font-size-medium: 1rem;
+  --font-size-large: 1.125rem;
+  --font-size-h1: 1.5rem;
+  --font-size-h2: 1.25rem;
 }
 
-/* 2. 全局基础重置 */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  position: relative; /* 这是一个有用的默认设置 */
-  font-weight: normal;
+
+
+html {
+  font-size: var(--font-size-base);
 }
 
-/* 3. 【关键】为 body 设置基础样式 */
 body {
-  /* 让 body 至少和屏幕一样高 */
-  min-height: 100vh;
-  
-  /* 应用我们定义的颜色变量 */
-  color: var(--color-text);
-  background: var(--color-background);
-
-  /* 设置优雅的字体 */
-  font-family:
-    Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  font-size: 15px;
-
-  /* 开启字体抗锯齿，让文字更清晰 */
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background: var(--background-color);
+  color: var(--text-color-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+ 
 }
 
-/* 4. 【关键补充】让 #app 也能继承高度 */
 #app {
   height: 100%;
 }

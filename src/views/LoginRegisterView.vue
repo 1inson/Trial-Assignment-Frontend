@@ -6,7 +6,7 @@
         <form @submit.prevent="handleSignUp">
           <h1>创建账户</h1>
           <span>填写下面的信息来注册</span>
-          <input type="text" placeholder="登录名 (不可修改)" v-model="signUpUsername" required />
+          <input type="text" placeholder="登录名" v-model="signUpUsername" required />
           <input type="text" placeholder="昵称" v-model="signUpNickname" required />
           <input type="password" placeholder="密码" v-model="signUpPassword" required />
           <button type="submit">注 册</button>
@@ -35,7 +35,7 @@
           </div>
           <div class="overlay-panel overlay-right">
             <h1>没有账户？</h1>
-            <p>立即注册，加入我们，开启一段新的旅程！</p>
+            <p>加入我们，开启一段新的旅程！</p>
             <button class="ghost" @click="isSignUp = true">去注册</button>
           </div>
         </div>
@@ -47,23 +47,26 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useUserStore } from '@/stores/userStore';
-import { useRouter } from 'vue-router';
 
 const isSignUp = ref(false);
 const userStore = useUserStore();
-const router = useRouter();
+const isLoading = ref(false);
+const errorMessage = ref('');
+
 
 // 登录表单数据
-const loginUsername = ref<string>('');
-const loginPassword = ref<string>('');
+const loginUsername = ref('');
+const loginPassword = ref('');
 
 // 注册表单数据
-const signUpUsername = ref<string>('');
-const signUpNickname = ref<string>('');
-const signUpPassword = ref<string>('');
+const signUpUsername = ref('');
+const signUpNickname = ref('');
+const signUpPassword = ref('');
 
 // 【最终版】处理登录
 const handleLogin = async () => {
+  isLoading.value = true;
+  errorMessage.value = '';
   try {
     // 调用 Pinia store 中真实的登录 action
     await userStore.login({ 
@@ -71,27 +74,26 @@ const handleLogin = async () => {
       password: loginPassword.value 
     });
     
-    // 如果 await 顺利执行完（没有抛出错误），说明登录成功
-    alert('登录成功！');
-    // 跳转到社区主页
-    router.push('/community'); 
 
   } catch (error: any) {
-    // 如果 store 中的 action 抛出错误，这里的 catch 会捕获到
-    console.error('登录失败:', error);
-    // 向用户显示后端返回的错误信息
-    alert(`登录失败: ${error.message}`);
+    // 登录失败，显示错误信息
+    errorMessage.value = error.message;
+  } finally {
+    isLoading.value = false;
   }
 };
 
 // 【最终版】处理注册
 const handleSignUp = async () => {
+  isLoading.value = true;
+  errorMessage.value = '';
   try {
     // 调用 Pinia store 中真实的注册 action
     await userStore.register({ 
       username: signUpUsername.value, 
       name: signUpNickname.value, 
-      password: signUpPassword.value 
+      password: signUpPassword.value,
+      usertype: 1,
     });
     
     alert('注册成功！将自动切换到登录界面，请使用新账户登录。');
@@ -102,6 +104,17 @@ const handleSignUp = async () => {
     console.error('注册失败:', error);
     alert(`注册失败: ${error.message}`);
   }
+};
+
+const togglePanel = (isSigningUp: boolean) => {
+  isSignUp.value = isSigningUp;
+  errorMessage.value = '';
+  // 清空表单数据，提升体验
+  loginUsername.value = '';
+  loginPassword.value = '';
+  signUpUsername.value = '';
+  signUpNickname.value = '';
+  signUpPassword.value = '';
 };
 </script>
 
@@ -146,76 +159,58 @@ const handleSignUp = async () => {
 }
 }
 
-.container {
-  background-color: var(--white);
-  border-radius: var(--button-radius);
-  box-shadow: 0 0.9rem 1.7rem rgba(0, 0, 0, 0.25);
-  height: 480px; /* 使用固定高度 */
-  max-width: 768px; /* 使用固定宽度 */
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-}
-
-.form-container {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  transition: all 0.6s ease-in-out;
-  background-color: #ffffff;
-}
-
-.form-container form {
-  background-color: var(--white);
+.page-container {
   display: flex;
-  align-items: center;
   justify-content: center;
-  flex-direction: column;
-  padding: 0 3rem;
-  height: 100%;
-  text-align: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--background-color);
+  font-family: 'Montserrat', sans-serif;
 }
 
-.form-container h1 {
-  font-weight: 300;
+h1 {
+  font-weight: bold;
   margin: 0;
-  margin-bottom: 1.25rem;
+  color: var(--text-color-primary);
+  font-size: var(--font-size-h1);
 }
 
-.form-container span {
-  font-size: 12px;
+p {
+  font-size: var(--font-size-medium);
+  font-weight: 100;
+  line-height: 20px;
+  letter-spacing: 0.5px;
+  margin: 20px 0 30px;
+}
+
+span {
+  font-size: var(--font-size-small);
+  color: var(--text-color-secondary);
   margin-bottom: 10px;
 }
 
-.form-container input {
-  background-color: #eee;
-  border: none;
-  border-radius: 5px;
-  padding: 0.9rem 0.9rem;
-  margin: 0.5rem 0;
-  width: 100%;
-}
-
-.form-container a {
-  color: var(--gray);
-  font-size: 0.9rem;
-  margin: 1.5rem 0;
+a {
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-medium);
   text-decoration: none;
+  margin: 15px 0;
+}
+a:hover {
+  color: var(--primary-color);
 }
 
 button {
-  background-color: var(--blue);
-  background-image: linear-gradient(90deg, var(--blue) 0%, var(--lightblue) 74%);
   border-radius: 20px;
-  border: 1px solid var(--blue);
-  color: var(--white);
-  cursor: pointer;
-  font-size: 0.8rem;
+  border: 1px solid var(--primary-color);
+  background-color: var(--primary-color);
+  color: var(--text-on-primary-color);
+  font-size: var(--font-size-small);
   font-weight: bold;
-  letter-spacing: 0.1rem;
-  padding: 0.9rem 4rem;
+  padding: 12px 45px;
+  letter-spacing: 1px;
   text-transform: uppercase;
   transition: transform 80ms ease-in;
+  cursor: pointer;
 }
 
 button:active {
@@ -226,17 +221,57 @@ button:focus {
   outline: none;
 }
 
-/* 覆盖层上的按钮样式 */
 button.ghost {
   background-color: transparent;
-  border-color: #FFFFFF;
+  border-color: var(--text-on-primary-color);
 }
 
-.form-container form button {
-  margin-top: 1.5rem;
+form {
+  background-color: var(--container-background-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0 50px;
+  height: 100%;
+  text-align: center;
 }
 
-/* 登录和注册表单的初始位置和动画 */
+input {
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  padding: 12px 15px;
+  margin: 8px 0;
+  width: 100%;
+  border-radius: 8px;
+  outline: none;
+  font-size: var(--font-size-medium);
+}
+input:focus {
+  border-color: var(--primary-color);
+}
+
+.container {
+  background-color: var(--container-background-color);
+  border-radius: 10px;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  position: relative;
+  overflow: hidden;
+  width: 768px;
+  max-width: 100%;
+  min-height: 480px;
+}
+
+.form-container {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  transition: all 0.6s ease-in-out;
+  background-color: var(--container-background-color); /* 确保背景不透明 */
+}
+
+/* ... 其他滑动动画的CSS保持不变 ... */
+/* 比如 .sign-in-container, .overlay-container 等 */
 .sign-in-container {
   left: 0;
   width: 50%;
@@ -249,8 +284,8 @@ button.ghost {
 
 .sign-up-container {
   left: 0;
-  opacity: 0;
   width: 50%;
+  opacity: 0;
   z-index: 1;
 }
 
@@ -261,63 +296,53 @@ button.ghost {
   z-index: 5;
 }
 
-/* 覆盖层样式，替代 .container_overlay 和 .overlay */
 .overlay-container {
-  height: 100%;
-  left: 50%;
-  overflow: hidden;
   position: absolute;
   top: 0;
-  transition: transform 0.6s ease-in-out;
+  left: 50%;
   width: 50%;
+  height: 100%;
+  overflow: hidden;
+  transition: transform 0.6s ease-in-out;
   z-index: 100;
 }
 
-.container.right-panel-active .overlay-container {
+.container.right-panel-active .overlay-container{
   transform: translateX(-100%);
 }
 
 .overlay {
-  background-color: var(--lightblue);
-  background: linear-gradient(to right, #ff4b2b, #ff416c); /* 渐变背景 */
-  color: #FFFFFF;
-  height: 100%;
-  left: -100%;
+  background: var(--primary-color);
+  background-image: linear-gradient(to right, var(--primary-color-soft) , var(--primary-color));
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 0 0;
+  color: var(--text-on-primary-color);
   position: relative;
+  left: -100%;
+  height: 100%;
+  width: 200%;
   transform: translateX(0);
   transition: transform 0.6s ease-in-out;
-  width: 200%;
 }
+
 .container.right-panel-active .overlay {
   transform: translateX(50%);
 }
 
 .overlay-panel {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: center;
   position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0 40px;
   text-align: center;
   top: 0;
+  height: 100%;
+  width: 50%;
   transform: translateX(0);
   transition: transform 0.6s ease-in-out;
-  width: 50%;
-  padding: 0 40px;
-}
-
-.overlay-panel h1 {
-    font-weight: bold;
-    margin: 0;
-}
-
-.overlay-panel p {
-    font-size: 14px;
-    font-weight: 100;
-    line-height: 20px;
-    letter-spacing: 0.5px;
-    margin: 20px 0 30px;
 }
 
 .overlay-left {
@@ -337,21 +362,10 @@ button.ghost {
   transform: translateX(20%);
 }
 
-/* 动画 */
 @keyframes show {
-  0%,
-  49.99% {
-    opacity: 0;
-    z-index: 1;
-  }
-
-  50%,
-  100% {
-    opacity: 1;
-    z-index: 5;
-  }
+  0%, 49.99% { opacity: 0; z-index: 1; }
+  50%, 100% { opacity: 1; z-index: 5; }
 }
-
 
 
 </style>

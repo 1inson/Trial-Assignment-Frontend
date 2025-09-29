@@ -36,7 +36,7 @@ import { createRouter, createWebHistory } from 'vue-router';
     // 全局前置路由守卫
     router.beforeEach((to, from, next) => {
       // 尝试从 localStorage 获取 token
-      const token = localStorage.getItem('user-token');
+      const token = localStorage.getItem('access-token');
 
       // 检查目标路由是否需要认证
       if (to.meta.requiresAuth && !token) {

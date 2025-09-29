@@ -47,7 +47,7 @@
       </div>
       
       <!-- 帖子列表 -->
-      <div v-else-if="userStore.myConfessions.length > 0" class="confession-list">
+      <div v-else-if="userStore.myConfessions && userStore.myConfessions.length > 0" class="confession-list">
         <!-- 【关键】使用 v-for 循环渲染真实的帖子数据 -->
         <div 
           class="confession-card" 
@@ -245,8 +245,180 @@ const handleUpload = async () => {
 };
 </script>
 
-<!-- 加载状态 -->
-  <div v-else class="loading-container">
-    <p>正在加载用户信息...</p>
-  </div>
 
+
+<style scoped>
+/* 页面主容器 */
+.profile-page {
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: var(--container-background-color); /* 使用纯白背景 */
+  border-left: 1px solid var(--border-color); /* 使用粉色系边框 */
+  border-right: 1px solid var(--border-color);
+  min-height: 100vh;
+}
+
+/* 顶部个人信息 Header */
+.profile-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  /* ...其他布局样式保持不变... */
+}
+
+.avatar {
+  width: 135px;
+  height: 135px;
+  border-radius: 9999px;
+  object-fit: cover;
+  /* 边框使用容器背景色，营造“抠出”的感觉 */
+  border: 4px solid var(--container-background-color); 
+  margin-top: -80px;
+  background-color: var(--border-color); /* 默认背景用浅粉色 */
+}
+
+/* 编辑资料按钮 */
+.edit-profile-button {
+  border: 1px solid var(--border-color); /* 边框 */
+  background-color: transparent;
+  color: var(--text-color-primary); /* 文字颜色 */
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.edit-profile-button:hover {
+  background-color: var(--border-color); /* hover时背景变浅粉 */
+}
+
+/* 用户信息 */
+.nickname {
+  font-size: var(--font-size-h2); /* 使用变量 */
+  font-weight: 800;
+  color: var(--text-color-primary);
+  margin: 0;
+}
+.username, .user-id {
+  color: var(--text-color-secondary);
+  margin: 0;
+}
+
+/* 帖子卡片 */
+.confession-card {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+.confession-card:hover {
+  background-color: var(--background-color); /* hover时用主背景色 */
+}
+
+/* 删除按钮 */
+.delete-button {
+    background: transparent;
+    border: 1px solid var(--danger-color);
+    color: var(--danger-color);
+}
+.delete-button:hover {
+    background: var(--danger-color);
+    color: var(--text-on-brand);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--container-background-color);
+  padding: 2rem;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: var(--text-color-primary);
+  font-size: var(--font-size-h2);
+}
+
+.form-group {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-small);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--background-color);
+  border-radius: 8px;
+  font-size: var(--font-size-medium);
+}
+.form-group input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.cancel-btn, .save-btn, .choose-file-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 99px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: var(--font-size-small);
+  transition: opacity 0.2s;
+}
+.cancel-btn:hover, .save-btn:hover, .choose-file-btn:hover {
+    opacity: 0.9;
+}
+
+.cancel-btn {
+  background-color: var(--border-color);
+  color: var(--text-color-secondary);
+}
+
+.save-btn, .choose-file-btn {
+  background-color: var(--primary-color);
+  color: var(--text-on-primary-color);
+}
+
+.avatar-preview {
+  margin-top: 1rem;
+}
+
+.avatar-preview img {
+  max-width: 150px;
+  max-height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-color);
+}
+
+</style>
